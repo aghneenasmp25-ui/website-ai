@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Show & Movie Rating Tracker</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f7f7f7;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* HEADER IMAGE */
+    .header {
+        width: 100%;
+        height: 260px;
+        background-image: url('https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=1400&q=80');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    h1 {
+        text-align: center;
+        margin-top: 20px;
+        color: #333;
+    }
+
+    .container {
+        background: white;
+        padding: 20px;
+        max-width: 500px;
+        width: calc(100% - 40px);
+        border-radius: 10px;
+        margin: 25px auto;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    input, textarea, select {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0 15px 0;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+
+    button {
+        background: #4b7bec;
+        color: white;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+    }
+
+    .entry {
+        background: #eef2ff;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 12px;
+        position: relative;
+    }
+
+    .delete-btn {
+        background: #ff4d4d;
+        padding: 6px 10px;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- HEADER IMAGE -->
+<div class="header"></div>
+
+<h1>Show & Movie Rating Tracker</h1>
+
+<div class="container">
+    <h2>Your Favorite Show</h2>
+    <label>Favorite Show:</label>
+    <input id="favoriteShow" placeholder="Enter your favorite show...">
+
+    <button onclick="saveFavorite()">Save Favorite Show</button>
+</div>
+
+<div class="container">
+    <h2>Add a Rating</h2>
+
+    <label>Title:</label>
+    <input id="title" placeholder="Stranger Things, Avengers, etc.">
+
+    <label>Rating (1–10):</label>
+    <select id="rating">
+        <option disabled selected>Select rating</option>
+        <script>
+            for (let i = 1; i <= 10; i++) {
+                document.write(`<option value="${i}">${i}</option>`);
+            }
+        </script>
+    </select>
+
+    <label>Notes:</label>
+    <textarea id="notes" placeholder="Your thoughts..."></textarea>
+
+    <button onclick="addRating()">Add Rating</button>
+</div>
+
+<div class="container">
+    <h2>Your Ratings</h2>
+    <div id="ratingsList"></div>
+</div>
+
+<script>
+// Load favorites + ratings on page load
+window.onload = function() {
+    loadFavorite();
+    loadRatings();
+};
+
+// Save favorite show
+function saveFavorite() {
+    const fav = document.getElementById("favoriteShow").value;
+    localStorage.setItem("favoriteShow", fav);
+    alert("Favorite show saved!");
+}
+
+// Load favorite on startup
+function loadFavorite() {
+    const fav = localStorage.getItem("favoriteShow");
+    if (fav) document.getElementById("favoriteShow").value = fav;
+}
+
+// Add a rating entry
+function addRating() {
+    const title = document.getElementById("title").value;
+    const rating = document.getElementById("rating").value;
+    const notes = document.getElementById("notes").value;
+
+    if (!title || !rating) {
+        alert("Please enter a title and rating.");
+        return;
+    }
+
+    const entry = { title, rating, notes };
+    let list = JSON.parse(localStorage.getItem("ratings")) || [];
+    list.push(entry);
+    localStorage.setItem("ratings", JSON.stringify(list));
+
+    document.getElementById("title").value = "";
+    document.getElementById("rating").value = "";
+    document.getElementById("notes").value = "";
+
+    loadRatings();
+}
+
+// Load all ratings
+function loadRatings() {
+    const ratingsList = document.getElementById("ratingsList");
+    ratingsList.innerHTML = "";
+
+    const list = JSON.parse(localStorage.getItem("ratings")) || [];
+
+    list.forEach((entry, index) => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.innerHTML = `
+            <strong>${entry.title}</strong><br>
+            Rating: ${entry.rating}/10<br>
+            Notes: ${entry.notes}<br>
+            <button class="delete-btn" onclick="deleteRating(${index})">Delete</button>
+        `;
+        ratingsList.appendChild(div);
+    });
+}
+
+// Delete a rating
+function deleteRating(index) {
+    let list = JSON.parse(localStorage.getItem("ratings")) || [];
+    list.splice(index, 1);
+    localStorage.setItem("ratings", JSON.stringify(list));
+    loadRatings();
+}
+</script>
+
+</body>
+</html>
